@@ -26,6 +26,8 @@ import {
   HStack,
   Badge,
   CardBody,
+  Spinner,
+  Center,
 } from '@chakra-ui/react'
 import { FiBook, FiCalendar, FiUsers, FiBell } from 'react-icons/fi'
 import { useRouter } from "next/navigation"
@@ -152,14 +154,16 @@ export default function DashboardPage() {
     },
   }
 
-  if (loading && !userData) {
+  if (status === "loading" || loading) {
     return (
-      <div className="flex flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold">Loading dashboard...</h1>
-        </div>
-      </div>
+      <Center h="100vh">
+        <Spinner size="xl" />
+      </Center>
     )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (

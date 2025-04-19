@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { type User, getAllUsers, updateUser, deleteUser } from "@/lib/user-service"
+import { Center, Spinner } from '@chakra-ui/react'
 
 export default function AdminUsersPage() {
   const { data: session, status } = useSession()
@@ -183,6 +184,18 @@ export default function AdminUsersPage() {
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
     }
+  }
+
+  if (status === "loading" || loading) {
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" />
+      </Center>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (

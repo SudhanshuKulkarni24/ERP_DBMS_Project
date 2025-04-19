@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import type { Metadata } from "next"
 import { checkEnvironmentVariables } from "@/lib/env-check"
+import { Providers } from "@/components/providers"
 
 // Check environment variables in development
 if (process.env.NODE_ENV !== "production") {
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ChakraProvider>
-          {children}
-        </ChakraProvider>
+        <Providers>
+          <ChakraProvider>
+            {children}
+          </ChakraProvider>
+        </Providers>
       </body>
     </html>
   )
