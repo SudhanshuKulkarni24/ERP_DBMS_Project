@@ -2,24 +2,37 @@ import { Pool } from "@neondatabase/serverless"
 
 // Check for environment variables
 if (!process.env.NEON_DATABASE_URL) {
+  console.error("Missing NEON_DATABASE_URL environment variable")
   throw new Error("NEON_DATABASE_URL environment variable is not set")
 }
 
+console.log("Attempting to create database pool...")
+
 // Create a connection pool
-const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL })
+const pool = new Pool({ 
+  connectionString: process.env.NEON_DATABASE_URL,
+  connectionTimeoutMillis: 5000, // 5 second timeout
+})
 
 // Helper function to execute SQL queries (server-side only)
 export async function executeQuery(query: string, params: any[] = []) {
-  // Ensure this only runs on the server
-  // if (typeof window !== "undefined") {
-  //   throw new Error("Database queries can only be executed on the server")
-  // }
-
-  const client = await pool.connect()
+  console.log("Executing query:", query.substring(0, 50) + "...")
+  
+  let client
   try {
-    return await client.query(query, params)
+    client = await pool.connect()
+    console.log("Connected to database successfully")
+    const result = await client.query(query, params)
+    console.log("Query executed successfully")
+    return result
+  } catch (error) {
+    console.error("Database query error:", error)
+    throw error
   } finally {
-    client.release()
+    if (client) {
+      console.log("Releasing database connection")
+      client.release()
+    }
   }
 }
 
