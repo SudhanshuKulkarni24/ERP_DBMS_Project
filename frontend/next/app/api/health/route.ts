@@ -1,12 +1,15 @@
-import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { executeQuery } from "@/lib/db"
 
-export async function GET() {
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: NextRequest) {
   try {
     // Try a simple query to check database connectivity
     const result = await executeQuery('SELECT NOW()')
     
-    return NextResponse.json({ 
+    return Response.json({ 
       status: "healthy",
       database: "connected",
       timestamp: result.rows[0].now,
@@ -20,7 +23,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Health check failed:", error)
-    return NextResponse.json({ 
+    return Response.json({ 
       status: "unhealthy",
       error: error instanceof Error ? error.message : "Unknown error",
       env_check: {
