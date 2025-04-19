@@ -45,23 +45,35 @@ export default function DashboardPage() {
   const [userRole] = useState<'student' | 'teacher'>('student')
 
   useEffect(() => {
-    if (status === "loading") return;
+    console.log("Session status:", status)
+    console.log("Session data:", session)
+    
+    if (status === "loading") {
+      console.log("Session is loading...")
+      return;
+    }
     
     if (!session) {
+      console.log("No session found, redirecting to login...")
       router.push("/login");
       return;
     }
 
     if (session?.user?.id) {
+      console.log("User ID found:", session.user.id)
       fetchUserData()
       fetchEnrollments()
       fetchAnnouncements()
+    } else {
+      console.log("No user ID in session:", session)
     }
   }, [session, status])
 
   const fetchUserData = async () => {
     try {
+      console.log("Fetching user data for ID:", session!.user.id)
       const user = await getUserById(session!.user.id)
+      console.log("Fetched user data:", user)
       setUserData(user)
     } catch (error) {
       console.error("Error fetching user data:", error)

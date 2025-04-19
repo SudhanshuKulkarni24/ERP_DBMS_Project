@@ -19,14 +19,18 @@ import {
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { FaGoogle } from 'react-icons/fa'
+import { useRouter } from 'next/navigation'
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const toast = useToast()
+  const router = useRouter()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsLoading(true)
     try {
       const result = await signIn('credentials', {
         email,
@@ -43,7 +47,7 @@ const LoginPage: React.FC = () => {
           isClosable: true,
         })
       } else {
-        window.location.href = '/dashboard'
+        router.push('/dashboard')
       }
     } catch (error) {
       toast({
@@ -53,13 +57,34 @@ const LoginPage: React.FC = () => {
         duration: 3000,
         isClosable: true,
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true)
     try {
-      await signIn('google', { callbackUrl: '/dashboard' })
+      const result = await signIn('google', { 
+        redirect: false,
+        callbackUrl: '/dashboard'
+      })
+      
+      console.log('Google sign-in result:', result)
+      
+      if (result?.error) {
+        toast({
+          title: 'Error',
+          description: result.error,
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        })
+      } else if (result?.url) {
+        router.push(result.url)
+      }
     } catch (error) {
+      console.error('Google sign-in error:', error)
       toast({
         title: 'Error',
         description: 'An error occurred during Google sign in',
@@ -67,6 +92,8 @@ const LoginPage: React.FC = () => {
         duration: 3000,
         isClosable: true,
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -79,6 +106,7 @@ const LoginPage: React.FC = () => {
             leftIcon={<FaGoogle />}
             colorScheme="red"
             onClick={handleGoogleSignIn}
+            isLoading={isLoading}
           >
             Sign in with Google
           </Button>
@@ -91,6 +119,7 @@ const LoginPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                 />
               </FormControl>
               <FormControl isRequired>
@@ -99,9 +128,15 @@ const LoginPage: React.FC = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </FormControl>
-              <Button type="submit" colorScheme="blue" width="full">
+              <Button 
+                type="submit" 
+                colorScheme="blue" 
+                width="full"
+                isLoading={isLoading}
+              >
                 Sign In
               </Button>
             </VStack>
