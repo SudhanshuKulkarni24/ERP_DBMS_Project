@@ -1,6 +1,7 @@
-export const runtime = 'edge'
+import { NextResponse } from 'next/server'
+
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  return Response.json({ status: "ok", message: "API route is working" })
+  return NextResponse.json({ status: "ok", message: "API route is working" })
 } 

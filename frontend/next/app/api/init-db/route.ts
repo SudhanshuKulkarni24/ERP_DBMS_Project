@@ -1,10 +1,9 @@
-import { NextRequest } from "next/server"
+import { NextResponse } from 'next/server'
 import { initDb } from "@/lib/init-db"
 
-export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   console.log("Starting database initialization...")
   
   try {
@@ -17,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     await initDb()
     console.log("Database initialization completed successfully")
-    return Response.json({ 
+    return NextResponse.json({ 
       message: "Database initialized successfully",
       env_check: {
         has_db_url: !!process.env.NEON_DATABASE_URL,
@@ -29,7 +28,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error initializing database:", error)
-    return Response.json({ 
+    return NextResponse.json({ 
       error: "Failed to initialize database", 
       details: error instanceof Error ? error.message : "Unknown error",
       env_check: {
