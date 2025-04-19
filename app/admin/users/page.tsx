@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast"
 import { type User, getAllUsers, updateUser, deleteUser } from "@/lib/user-service"
 
 export default function AdminUsersPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const { toast } = useToast()
 
@@ -45,14 +45,20 @@ export default function AdminUsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
   useEffect(() => {
-    // Redirect if not admin
-    if (session && session.user.role !== "admin") {
-      router.push("/dashboard")
-      return
+    if (status === "loading") return;
+    
+    if (!session) {
+      router.push("/login");
+      return;
     }
 
-    fetchUsers()
-  }, [session, router])
+    if (session?.user?.role !== "admin") {
+      router.push("/dashboard");
+      return;
+    }
+
+    fetchUsers();
+  }, [session, status]);
 
   const fetchUsers = async () => {
     try {

@@ -28,10 +28,12 @@ import {
   CardBody,
 } from '@chakra-ui/react'
 import { FiBook, FiCalendar, FiUsers, FiBell } from 'react-icons/fi'
+import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { toast } = useToast()
+  const router = useRouter()
 
   const [userData, setUserData] = useState<any>(null)
   const [enrollments, setEnrollments] = useState<any[]>([])
@@ -41,12 +43,19 @@ export default function DashboardPage() {
   const [userRole] = useState<'student' | 'teacher'>('student')
 
   useEffect(() => {
+    if (status === "loading") return;
+    
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+
     if (session?.user?.id) {
       fetchUserData()
       fetchEnrollments()
       fetchAnnouncements()
     }
-  }, [session])
+  }, [session, status])
 
   const fetchUserData = async () => {
     try {
