@@ -23,6 +23,7 @@ import {
   VStack,
   HStack,
   Badge,
+  CardBody,
 } from '@chakra-ui/react'
 import { FiBook, FiCalendar, FiUsers, FiBell } from 'react-icons/fi'
 
