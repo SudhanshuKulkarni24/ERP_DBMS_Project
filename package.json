@@ -6,10 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "next": "14.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "@auth/core": "latest",
     "@aws-sdk/client-rds-data": "latest",
     "@cloudflare/workers-types": "latest",
@@ -78,8 +81,6 @@
     "nodemailer": "latest",
     "pg": "latest",
     "postgres": "latest",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "react-day-picker": "^8.10.1",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
@@ -98,7 +99,7 @@
     "react-icons": "^5.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
