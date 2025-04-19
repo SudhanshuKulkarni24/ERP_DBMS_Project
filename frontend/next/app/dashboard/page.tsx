@@ -9,6 +9,22 @@ import { getUserById } from "@/lib/user-service"
 import { getEnrollmentsForStudent } from "@/lib/course-service"
 import { getAnnouncementsForStudent } from "@/lib/announcement-service"
 import { useToast } from "@/hooks/use-toast"
+import {
+  Box,
+  Container,
+  Grid,
+  Heading,
+  Text,
+  SimpleGrid,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  VStack,
+  HStack,
+  Badge,
+} from '@chakra-ui/react'
+import { FiBook, FiCalendar, FiUsers, FiBell } from 'react-icons/fi'
 
 export default function DashboardPage() {
   const { data: session } = useSession()
@@ -19,6 +35,7 @@ export default function DashboardPage() {
   const [announcements, setAnnouncements] = useState<any[]>([])
   const [upcomingClasses, setUpcomingClasses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [userRole] = useState<'student' | 'teacher'>('student')
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -108,6 +125,21 @@ export default function DashboardPage() {
   // Maximum credits (could be fetched from a settings table in the future)
   const maxCredits = 25
 
+  const data = {
+    student: {
+      enrolledCourses: enrollments.length,
+      upcomingAssignments: 3,
+      announcements: announcements.length,
+      nextClass: upcomingClasses.length > 0 ? upcomingClasses[0].name : "No upcoming class",
+    },
+    teacher: {
+      teachingCourses: 2,
+      totalStudents: 120,
+      pendingAssignments: 5,
+      announcements: 1,
+    },
+  }
+
   if (loading && !userData) {
     return (
       <div className="flex flex-col gap-4 p-4 md:gap-8 md:p-8">
@@ -119,137 +151,192 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex items-center gap-4">
-        <h1 className="text-3xl font-bold">Welcome, {userData?.name || session?.user?.name}</h1>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Student ID</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userData?.student_id || "Not assigned"}</div>
-            <p className="text-xs text-muted-foreground">{userData?.branch || "Department not assigned"}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Graduating Year</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userData?.graduating_year || "Not set"}</div>
-            <p className="text-xs text-muted-foreground">Expected graduation</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Registered Credits</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {registeredCredits} / {maxCredits}
-            </div>
-            <div className="mt-2 h-2 w-full rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${(registeredCredits / maxCredits) * 100}%` }}
+    <Container maxW="container.xl" py={8}>
+      <VStack spacing={8} align="stretch">
+        <Box>
+          <Heading size="lg" mb={2}>
+            Welcome back, {userRole === 'student' ? 'Student' : 'Professor'}
+          </Heading>
+          <Text color="gray.600">Here's what's happening with your courses</Text>
+        </Box>
+
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
+          {userRole === 'student' ? (
+            <>
+              <StatCard
+                icon={FiBook}
+                label="Enrolled Courses"
+                value={data.student.enrolledCourses}
               />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Registration Status</CardTitle>
-            <CheckCircle className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{enrollments.length > 0 ? "Complete" : "Not Started"}</div>
-            <p className="text-xs text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Today's Classes</CardTitle>
-            <CardDescription>Your upcoming classes for today</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {upcomingClasses.length > 0 ? (
-                upcomingClasses.map((class_, index) => (
-                  <div key={index} className="flex items-start gap-4 rounded-lg border p-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded bg-primary/10 text-primary">
-                      <Clock className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{class_.name}</h3>
-                        <div className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{class_.id}</div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {class_.time} • {class_.location}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Instructor: {class_.instructor}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex justify-center p-4 text-muted-foreground">No classes scheduled for today</div>
+              <StatCard
+                icon={FiCalendar}
+                label="Upcoming Assignments"
+                value={data.student.upcomingAssignments}
+              />
+              <StatCard
+                icon={FiBell}
+                label="New Announcements"
+                value={data.student.announcements}
+              />
+              <StatCard
+                icon={FiCalendar}
+                label="Next Class"
+                value={data.student.nextClass}
+                isTime
+              />
+            </>
+          ) : (
+            <>
+              <StatCard
+                icon={FiBook}
+                label="Teaching Courses"
+                value={data.teacher.teachingCourses}
+              />
+              <StatCard
+                icon={FiUsers}
+                label="Total Students"
+                value={data.teacher.totalStudents}
+              />
+              <StatCard
+                icon={FiCalendar}
+                label="Pending Assignments"
+                value={data.teacher.pendingAssignments}
+              />
+              <StatCard
+                icon={FiBell}
+                label="Announcements"
+                value={data.teacher.announcements}
+              />
+            </>
+          )}
+        </SimpleGrid>
+
+        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
+          <Card>
+            <CardBody>
+              <VStack align="stretch" spacing={4}>
+                <Heading size="md">Recent Activity</Heading>
+                <ActivityItem
+                  title="Assignment Submitted"
+                  description="Database Design Project"
+                  time="2 hours ago"
+                />
+                <ActivityItem
+                  title="New Announcement"
+                  description="Mid-term exam schedule"
+                  time="5 hours ago"
+                />
+                <ActivityItem
+                  title="Course Material Updated"
+                  description="Advanced SQL Queries"
+                  time="1 day ago"
+                />
+              </VStack>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardBody>
+              <VStack align="stretch" spacing={4}>
+                <Heading size="md">Upcoming Events</Heading>
+                <EventItem
+                  title="Database Systems"
+                  time="10:00 AM"
+                  date="Today"
+                />
+                <EventItem
+                  title="Web Development"
+                  time="2:00 PM"
+                  date="Today"
+                />
+                <EventItem
+                  title="Project Submission"
+                  time="11:59 PM"
+                  date="Tomorrow"
+                />
+              </VStack>
+            </CardBody>
+          </Card>
+        </Grid>
+      </VStack>
+    </Container>
+  )
+}
+
+interface StatCardProps {
+  icon: any
+  label: string
+  value: string | number
+  isTime?: boolean
+}
+
+function StatCard({ icon: Icon, label, value, isTime }: StatCardProps) {
+  return (
+    <Card>
+      <CardBody>
+        <Stat>
+          <HStack spacing={4}>
+            <Box
+              p={2}
+              bg="blue.100"
+              color="blue.500"
+              borderRadius="lg"
+            >
+              <Icon size={24} />
+            </Box>
+            <Box>
+              <StatLabel>{label}</StatLabel>
+              <StatNumber fontSize={isTime ? 'md' : '2xl'}>
+                {value}
+              </StatNumber>
+              {!isTime && (
+                <StatHelpText>
+                  {typeof value === 'number' && value > 1 ? 'items' : 'item'}
+                </StatHelpText>
               )}
-              <div className="flex justify-center">
-                <Link className="text-sm text-primary underline-offset-4 hover:underline" href="/dashboard/timetable">
-                  View Full Timetable
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Announcements</CardTitle>
-            <CardDescription>Recent updates and notifications</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {announcements.length > 0 ? (
-                announcements.map((announcement) => (
-                  <div key={announcement.id} className="flex items-start gap-4 rounded-lg border p-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded text-primary">
-                      {announcement.priority === "high" ? (
-                        <AlertCircle className="h-5 w-5 text-amber-500" />
-                      ) : (
-                        <CheckCircle className="h-5 w-5 text-blue-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium">{announcement.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(announcement.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex justify-center p-4 text-muted-foreground">No recent announcements</div>
-              )}
-              <div className="flex justify-center">
-                <Link
-                  className="text-sm text-primary underline-offset-4 hover:underline"
-                  href="/dashboard/announcements"
-                >
-                  View All Announcements
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            </Box>
+          </HStack>
+        </Stat>
+      </CardBody>
+    </Card>
+  )
+}
+
+interface ActivityItemProps {
+  title: string
+  description: string
+  time: string
+}
+
+function ActivityItem({ title, description, time }: ActivityItemProps) {
+  return (
+    <Box>
+      <HStack justify="space-between">
+        <Text fontWeight="bold">{title}</Text>
+        <Text fontSize="sm" color="gray.500">
+          {time}
+        </Text>
+      </HStack>
+      <Text color="gray.600">{description}</Text>
+    </Box>
+  )
+}
+
+interface EventItemProps {
+  title: string
+  time: string
+  date: string
+}
+
+function EventItem({ title, time, date }: EventItemProps) {
+  return (
+    <Box>
+      <HStack justify="space-between">
+        <Text fontWeight="bold">{title}</Text>
+        <Badge colorScheme="blue">{date}</Badge>
+      </HStack>
+      <Text color="gray.600">{time}</Text>
+    </Box>
   )
 }
 

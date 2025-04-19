@@ -1,7 +1,6 @@
-import type React from "react"
-import { Inter } from "next/font/google"
-import { Providers } from "@/components/providers"
-import "./globals.css"
+import { ChakraProvider } from '@chakra-ui/react'
+import { Inter } from 'next/font/google'
+import './globals.css'
 import type { Metadata } from "next"
 import { checkEnvironmentVariables } from "@/lib/env-check"
 
@@ -10,13 +9,11 @@ if (process.env.NODE_ENV !== "production") {
   checkEnvironmentVariables()
 }
 
+const inter = Inter({ subsets: ['latin'] })
 
-const inter = Inter({ subsets: ["latin"] })
-
-export const metadata: Metadata = {
-  title: "ERP 2.0 - Timetable Planning",
-  description: "A timetable planning app for students",
-  generator: "human sweat and tears (and little bit of blood) and v0",
+export const metadata = {
+  title: 'Course Management System',
+  description: 'A comprehensive system for course registration and management',
 }
 
 export default function RootLayout({
@@ -27,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <ChakraProvider>
+          {children}
+        </ChakraProvider>
       </body>
     </html>
   )
