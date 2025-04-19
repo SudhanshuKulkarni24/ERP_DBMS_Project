@@ -1,12 +1,12 @@
 import { Pool } from "@neondatabase/serverless"
 
 // Check for environment variables
-if (!process.env.NEON_DATABASE_URL && !process.env.NEXT_PUBLIC_NEON_DATABASE_URL) {
+if (!process.env.NEON_DATABASE_URL) {
   throw new Error("NEON_DATABASE_URL environment variable is not set")
 }
 
 // Create a connection pool
-const pool = new Pool({ connectionString: process.env.NEXT_PUBLIC_NEON_DATABASE_URL })
+const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL })
 
 // Helper function to execute SQL queries (server-side only)
 export async function executeQuery(query: string, params: any[] = []) {
