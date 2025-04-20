@@ -63,26 +63,13 @@ const LoginPage: React.FC = () => {
   }
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true)
     try {
-      const result = await signIn('google', { 
-        redirect: false,
-        callbackUrl: '/dashboard'
+      setIsLoading(true)
+      // Use direct redirection for Google sign-in
+      await signIn('google', {
+        callbackUrl: '/dashboard',
+        redirect: true
       })
-      
-      console.log('Google sign-in result:', result)
-      
-      if (result?.error) {
-        toast({
-          title: 'Error',
-          description: result.error,
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        })
-      } else if (result?.url) {
-        router.push(result.url)
-      }
     } catch (error) {
       console.error('Google sign-in error:', error)
       toast({
@@ -92,7 +79,6 @@ const LoginPage: React.FC = () => {
         duration: 3000,
         isClosable: true,
       })
-    } finally {
       setIsLoading(false)
     }
   }

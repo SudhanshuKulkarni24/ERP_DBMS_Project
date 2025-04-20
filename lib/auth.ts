@@ -10,6 +10,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "select_account"
+        }
+      },
       profile(profile) {
         return {
           id: profile.sub,
@@ -63,6 +68,28 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          const existingUser = await getUserByEmail(user.email as string)
+          
+          if (!existingUser) {
+            // Create new user
+            await createUserFn({
+              name: user.name as string,
+              email: user.email as string,
+              role: "student",
+              password: "", // No password for OAuth users
+            })
+          }
+          return true
+        } catch (error) {
+          console.error("Error in signIn callback:", error)
+          return false
+        }
+      }
+      return true
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.role = user.role
@@ -77,18 +104,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const existingUser = await getUserByEmail(token.email as string)
 
-          if (!existingUser) {
-            // User doesn't exist, create a new user
-            const newUser = await createUserFn({
-              name: token.name as string,
-              email: token.email as string,
-              role: "student",
-              password: "", // No password for OAuth users
-            })
-
-            token.role = "student"
-            token.id = newUser.id
-          } else {
+          if (existingUser) {
             // User exists, update token with user data
             token.role = existingUser.role
             token.id = existingUser.id
@@ -97,7 +113,7 @@ export const authOptions: NextAuthOptions = {
             token.graduatingYear = existingUser.graduating_year
           }
         } catch (error) {
-          console.error("Error handling Google sign-in:", error)
+          console.error("Error in jwt callback:", error)
         }
       }
 
@@ -122,6 +138,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
 }
 
