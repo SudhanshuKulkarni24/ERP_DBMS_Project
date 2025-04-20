@@ -46,25 +46,36 @@ export default function AdminUsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
   useEffect(() => {
-    if (status === "loading") return;
+    console.log("Session status:", status);
+    console.log("Session data:", session);
+    
+    if (status === "loading") {
+      console.log("Session is loading...");
+      return;
+    }
     
     if (!session) {
+      console.log("No session found, redirecting to login");
       router.push("/login");
       return;
     }
 
     if (session?.user?.role !== "admin") {
+      console.log("User is not admin, redirecting to dashboard");
       router.push("/dashboard");
       return;
     }
 
+    console.log("Fetching users...");
     fetchUsers();
   }, [session, status]);
 
   const fetchUsers = async () => {
     try {
+      console.log("Starting to fetch users...");
       setLoading(true)
       const data = await getAllUsers()
+      console.log("Fetched users:", data);
       setUsers(data)
     } catch (error) {
       console.error("Error fetching users:", error)
